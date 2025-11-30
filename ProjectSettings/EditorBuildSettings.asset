@@ -4,7 +4,19 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: 11246e63463b4c14e9db69d00df9eacc
+  - enabled: 1
+    path: Assets/Scenes/Garden.unity
+    guid: 87ce07c59e66310498edef58e1f1d1ac
+  - enabled: 1
+    path: Assets/Scenes/MeditationRoom.unity
+    guid: ce9be91e70a493545958b1b3075fc408
+  - enabled: 1
+    path: Assets/Scenes/SeedShop.unity
+    guid: bed42967f0f40774e8991948835bdd6f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 289c1b55c9541489481df5cc06664110, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 22bb4152870a91143b91cfcf85401ac1, type: 2}
