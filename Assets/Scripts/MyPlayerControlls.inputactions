@@ -1,0 +1,55 @@
+{
+    "version": 1,
+    "name": "MyPlayerControlls",
+    "maps": [
+        {
+            "name": "MyPlayer",
+            "id": "59df0524-5cf2-4245-8c24-bb1a3ef1448f",
+            "actions": [
+                {
+                    "name": "Look",
+                    "type": "Value",
+                    "id": "f5ef9b5d-bdc4-443c-8673-359c9412a8de",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MoveForward",
+                    "type": "Button",
+                    "id": "6d7d6543-3f38-47e6-bf54-45510a15abbb",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "0a011872-7dac-433e-90b8-f7dbf2bdc80e",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "24f2543b-1b85-4f3a-b70d-3a268861b2c3",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveForward",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
