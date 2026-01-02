@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class WateringCan : MonoBehaviour
 {
-    // Función que llamará el Event Trigger tras mirar 2 segundos
+    // Funciï¿½n que llamarï¿½ el Event Trigger tras mirar 2 segundos
     public void PickUp()
     {
-        // Buscamos el inventario en el jugador (que suele estar en la cámara)
+        // Buscamos el inventario en el jugador (que suele estar en la cï¿½mara)
         PlayerInventory inventory = FindObjectOfType<PlayerInventory>();
 
         if (inventory != null)
