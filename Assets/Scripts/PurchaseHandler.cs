@@ -1,40 +1,26 @@
 using UnityEngine;
-using TMPro;
-using System.Collections;
 
 public class PurchaseHandler : MonoBehaviour
 {
-    [Header("Notification UI")]
-    public GameObject notificationCanvas;
-    public TextMeshProUGUI notificationText;
-    
-    [Header("Seed Settings")]
     public string seedName;
-    private bool isPurchased = false;
+    public GameObject flowerPrefab;
+    public Transform inventoryParent;
 
     public void ExecutePurchase()
     {
-        // Prevent multiple purchases if the user keeps looking at the object
-        if (isPurchased) return;
+        InventoryItemUI[] items = inventoryParent.GetComponentsInChildren<InventoryItemUI>();
 
-        isPurchased = true;
-        Debug.Log("!!! PURCHASE SUCCESSFUL: " + seedName + " !!!");
-
-        // Show the UI notification
-        if (notificationCanvas != null && notificationText != null)
+        foreach (InventoryItemUI item in items)
         {
-            notificationText.text = "You bought " + seedName + "!";
-            notificationCanvas.SetActive(true);
-            
-            // Restart the hide timer in case another notification was active
-            StopAllCoroutines(); 
-            StartCoroutine(HideNotification());
+            if (item.seedName == seedName)
+            {
+                item.AddOne();
+                return;
+            }
         }
-    }
 
-    private IEnumerator HideNotification()
-    {
-        yield return new WaitForSeconds(2.5f);
-        notificationCanvas.SetActive(false);
+        GameObject newItem = Instantiate(flowerPrefab, inventoryParent);
+        InventoryItemUI itemUI = newItem.GetComponent<InventoryItemUI>();
+        itemUI.seedName = seedName;
     }
 }

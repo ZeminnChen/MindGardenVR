@@ -7,7 +7,7 @@ public class VisualFeedback : MonoBehaviour
     [HideInInspector]
     public Vector3 originalScale;
 
-    // Este factor lo ajustaste tú (ej. 1.1)
+    // Este factor lo ajustaste tï¿½ (ej. 1.1)
     public float scaleFactor = 1.1f;
 
     void Start()
@@ -15,9 +15,9 @@ public class VisualFeedback : MonoBehaviour
         originalScale = transform.localScale;
     }
 
-    // Método llamado por GazeInputModule para escalar.
+    // Mï¿½todo llamado por GazeInputModule para escalar.
     public void SetGazeActive(bool isActive)
-    {
+    {   
         if (isActive)
         {
             // Resaltar
