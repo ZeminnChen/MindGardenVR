@@ -5,6 +5,12 @@ public class PurchaseHandler : MonoBehaviour
     public string seedName;
     public GameObject flowerPrefab;
     public Transform inventoryParent;
+    public GameObject emptyMessage; 
+
+    void Start()
+    {
+        UpdateEmptyMessage();
+    }
 
     public void ExecutePurchase()
     {
@@ -15,6 +21,7 @@ public class PurchaseHandler : MonoBehaviour
             if (item.seedName == seedName)
             {
                 item.AddOne();
+                UpdateEmptyMessage(); 
                 return;
             }
         }
@@ -22,5 +29,16 @@ public class PurchaseHandler : MonoBehaviour
         GameObject newItem = Instantiate(flowerPrefab, inventoryParent);
         InventoryItemUI itemUI = newItem.GetComponent<InventoryItemUI>();
         itemUI.seedName = seedName;
+
+        UpdateEmptyMessage();
+    }
+
+    private void UpdateEmptyMessage()
+    {
+        if (emptyMessage != null)
+        {
+            bool hasItems = inventoryParent.childCount > 0;
+            emptyMessage.SetActive(!hasItems);
+        }
     }
 }
