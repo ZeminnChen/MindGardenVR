@@ -14,5 +14,5 @@ AssetOrigin:
   productId: 107400
   packageName: FREE Skybox Extended Shader
   packageVersion: 2.4.0
-  assetPath: Assets/BOXOPHOBIC/Utils/Editor/StyledGUI/DrawWindowBanner.cs
+  assetPath: Assets/Samples/BOXOPHOBIC/Utils/Editor/StyledGUI/DrawWindowBanner.cs
   uploadId: 812646
