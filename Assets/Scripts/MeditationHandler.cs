@@ -10,53 +10,87 @@ public class MeditationHandler : MonoBehaviour
     public AudioClip zenClip;
     public AudioClip bambooClip;
 
-    [Header("Visual Effects")]
-    public Material starsSkybox;
+    [Header("UI")]
     public TextMeshProUGUI subtitleText;
-    [Range(0.1f, 2f)] public float transitionSpeed = 0.5f;
 
     private Coroutine sessionCoroutine;
 
-    // --- BUTTONS ---
-
+    // BE PRESENT
     public void PlayLotus() {
-        string[] script = { "Welcome to the Lotus path.", "Breathe in the light...", "Let the world fade away." };
-        float[] timing = { 1f, 5f, 10f };
-        StartMeditation(lotusClip, script, timing);
+        string[] phrases = { 
+            "I want you to let yourself be here, ",
+            "in this moment and time.", 
+            "Let go of expectations,", 
+            "of to-do lists,",
+            "and be here.", 
+            "Be present.", 
+            "Take a big breath in,", 
+            "and on your exhale, sigh it out.",
+            "Another big breath in,", 
+            "exhale, let it go.", 
+            "One more inhale; fill up,", 
+            "exhal; sight it out.", 
+            "Let your mind,",
+            "your breath,", 
+            "and your awareness of your body start to link up as one", 
+            "as you take this moment for you", 
+            "Be present in this space." 
+        };
+        float[] timestamps = { 1f, 4f, 8f, 10f, 12f, 15f, 17f, 20f, 25f, 29f, 33f, 38f, 44f, 46f, 47f, 51f, 54f };
+        StartMeditation(lotusClip, phrases, timestamps); 
     }
 
+    // BE YOU
     public void PlayZen() {
-        string[] script = { "Entering Zen mode.", "Find your center.", "The universe is within you." };
-        float[] timing = { 1f, 4f, 8f };
-        StartMeditation(zenClip, script, timing);
+        string[] phrases = { 
+            "I want you to start by placing both hands on your heart.", 
+            "Take a big breath in, ", 
+            "feel your breath rise,", 
+            "and a long breath out, exhale.", 
+            "And start to feel your heart beat, ", 
+            "the beauty of being you", 
+            "and being alive in your own skin.", 
+            "And the one thing that you have that nobody else has", 
+            "is you. ",
+            "Your voice, ",
+            "your mind, ",
+            "your story, ", 
+            "your vision.",
+            "So live as only you can.", 
+            "The one that you are looking for is you.", 
+            "Set your intention for the day.", 
+            "Practice gratitude for how amazing you are.", 
+            "Shine your light wherever you go.", 
+            "You are beautiful and blessed." 
+        };
+        float[] timestamps = { 1f, 6f, 9f, 12f, 16f, 20f, 21f, 26f, 29f, 31f, 33f, 35f, 36f, 38f, 41f, 46f, 48f, 52f, 55f }; 
+        StartMeditation(zenClip, phrases, timestamps); 
     }
-
 
     public void PlayBamboo() {
         string[] phrases = { 
-            "This is a one minute guided meditation...", // 0:00
-            "No matter what's going on in your life right now,", // 0:02
-            "no matter how many thoughts are racing around your mind,", // 0:05
-            "no matter how the body is feeling...", // 0:11
-            "just take a moment to sit down and take a big deep breath.", // 0:14
-            "Breathing in through the nose...", // 0:18
-            "and out through the mouth.", // 0:21
-            "Feel a sense of taking in fresh air. The lungs expand.", // 0:23
-            "Feel a sense of letting go of any stress.", // 0:31
-            "Feeling the muscles soften and relax...", // 0:36
-            "Close your eyes if you'd like to.", // 0:41
-            "Once more, breathing deeply in through the nose...", // 0:43
-            "and out through the mouth.", // 0:48
-            "Take a moment to pause. Allow the thoughts to come and go.", // 0:52
-            "And then, gently opening the eyes again." // 0:57
+            "This is a one minute guided meditation.", 
+            "No matter what's going on in your life right now,", 
+            "no matter how many thoughts are racing around your mind,", 
+            "no matter how the body is feeling, ", 
+            "just take a moment to sit down and take a big deep breath.", 
+            "Breathing in through the nose, ", 
+            "and out through the mouth.", 
+            "as you breath in, feel a sense of taking in fresh air, ", 
+            "the lungs expanding, ",
+            "As you breath out, feel a sense of letting go of any stress in the body,", 
+            "in the mind, ",
+            "just feeling the muscles soften and relax.", 
+            "And close your eyes if you'd like to once more.", 
+            "Breathing deeply in through the nose, ", 
+            "and out through the mouth.", 
+            "And just take a moment to pause, ",
+            "allow the thoughts to come in and go,",
+            "and then, gently opening the eyes again." 
         };
-
-        float[] timestamps = {f, 2f, 5f, 11f, 14f, 18f, 21f, 23f, 31f, 36f, 41f, 43f, 48f, 52f, 57f };
-
+        float[] timestamps = { 0f, 3f, 7f, 11f, 14f, 19f, 21f, 24f, 28f, 31f, 36f, 38f, 42f, 46f, 49f, 51f, 54f, 56f};
         StartMeditation(bambooClip, phrases, timestamps); 
-}
-
-    // --- CORE LOGIC ---
+    }
 
     private void StartMeditation(AudioClip clip, string[] phrases, float[] times)
     {
@@ -66,43 +100,22 @@ public class MeditationHandler : MonoBehaviour
 
     IEnumerator MeditationRoutine(AudioClip clip, string[] phrases, float[] times)
     {
-        // 1. Fade to Black (Series Style Transition)
-        yield return StartCoroutine(FadeExposure(1f, 0f));
-
-        // 2. Change Skybox while dark
-        RenderSettings.skybox = starsSkybox;
         subtitleText.text = ""; 
-
-        // 3. Start Audio
         audioSource.clip = clip;
         audioSource.Play();
 
-        // 4. Fade back up to the Stars
-        StartCoroutine(FadeExposure(0f, 1f));
-
-        // 5. Display Subtitles in real-time
         float startTime = Time.time;
         for (int i = 0; i < phrases.Length; i++)
         {
             while (Time.time - startTime < times[i]) yield return null;
+            
             subtitleText.text = phrases[i];
+            subtitleText.canvasRenderer.SetAlpha(0f);
+            subtitleText.CrossFadeAlpha(1f, 0.5f, false);
         }
 
-        // Clear subtitles after a while
         yield return new WaitForSeconds(4f);
-        subtitleText.text = "";
-    }
-
-    IEnumerator FadeExposure(float start, float end)
-    {
-        float current = start;
-        while (!Mathf.Approximately(current, end))
-        {
-            current = Mathf.MoveTowards(current, end, Time.deltaTime * transitionSpeed);
-            RenderSettings.skybox.SetFloat("_Exposure", current);
-            DynamicGI.UpdateEnvironment(); // Updates lighting for the garden
-            yield return null;
-        }
+        subtitleText.CrossFadeAlpha(0f, 1f, false);
     }
 
     public void StopMeditation()
@@ -110,6 +123,5 @@ public class MeditationHandler : MonoBehaviour
         StopAllCoroutines();
         audioSource.Stop();
         subtitleText.text = "";
-        RenderSettings.skybox.SetFloat("_Exposure", 1f);
     }
 }
