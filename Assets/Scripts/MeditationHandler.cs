@@ -2,6 +2,8 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 
+
+// Subtitles + Audio
 public class MeditationHandler : MonoBehaviour
 {
     [Header("Audio Tracks")]

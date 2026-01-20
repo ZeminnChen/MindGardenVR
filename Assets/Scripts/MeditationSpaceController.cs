@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
+
+// Stars space
 public class MeditationSpaceController : MonoBehaviour
 {
     public Camera mainCamera;
