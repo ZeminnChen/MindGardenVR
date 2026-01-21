@@ -1,11 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// Asegúrate de que este script requiere el CharacterController para evitar errores.
+// Asegï¿½rate de que este script requiere el CharacterController para evitar errores.
 [RequireComponent(typeof(CharacterController))]
 public class VrCommands : MonoBehaviour
 {
-    // Variables de control de rotación (mantenidas)
+    // Variables de control de rotaciï¿½n (mantenidas)
     public float rotationSpeed = 30.0f;
 
     // --- Variables de Teletransporte ---
@@ -20,7 +20,7 @@ public class VrCommands : MonoBehaviour
     // Variables de Input
     public MyPlayerControlls controls;
     private Vector2 lookInput;
-    private bool teleportTriggered; // Usamos esto para detectar la pulsación/soltura
+    private bool teleportTriggered; // Usamos esto para detectar la pulsaciï¿½n/soltura
 
     private void Awake()
     {
@@ -56,22 +56,22 @@ public class VrCommands : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         if (mainCameraTransform.parent != transform)
         {
-            Debug.LogWarning("La cámara principal no es hija del Player. La rotación de mirada vertical no funcionará correctamente.");
+            Debug.LogWarning("La cï¿½mara principal no es hija del Player. La rotaciï¿½n de mirada vertical no funcionarï¿½ correctamente.");
         }
     }
 
     void Update()
     {
-        // 1. Rotación de la Mirada (Ejes X y Y)
+        // 1. Rotaciï¿½n de la Mirada (Ejes X y Y)
         HandleRotation();
     }
 
     private void HandleRotation()
     {
-        // Rotación Horizontal (Y) en el Player
+        // Rotaciï¿½n Horizontal (Y) en el Player
         transform.Rotate(0, lookInput.x * rotationSpeed * Time.deltaTime, 0);
 
-        // Rotación Vertical (X) en la Cámara
+        // Rotaciï¿½n Vertical (X) en la Cï¿½mara
         if (mainCameraTransform != null && mainCameraTransform.parent == transform)
         {
             mainCameraTransform.localRotation *= Quaternion.Euler(-lookInput.y * rotationSpeed * Time.deltaTime, 0, 0);
@@ -88,17 +88,17 @@ public class VrCommands : MonoBehaviour
 
         RaycastHit hit;
 
-        // El Raycast se dispara desde la posición y dirección de la cámara (la mirada).
+        // El Raycast se dispara desde la posiciï¿½n y direcciï¿½n de la cï¿½mara (la mirada).
         if (Physics.Raycast(mainCameraTransform.position, mainCameraTransform.forward, out hit, maxTeleportDistance, teleportLayerMask))
         {
-            // La altura a mantener: la mitad de la altura del CharacterController más el skin.
+            // La altura a mantener: la mitad de la altura del CharacterController mï¿½s el skin.
             float playerHeightOffset = characterController.height / 2f + characterController.skinWidth;
 
             Vector3 newPosition = hit.point;
             newPosition.y += playerHeightOffset;
 
-            // Movimiento instantáneo con CharacterController:
-            // 1. Deshabilitar para evitar problemas de colisión al teletransportar.
+            // Movimiento instantï¿½neo con CharacterController:
+            // 1. Deshabilitar para evitar problemas de colisiï¿½n al teletransportar.
             characterController.enabled = false;
             // 2. Teletransportar.
             transform.position = newPosition;
@@ -109,7 +109,7 @@ public class VrCommands : MonoBehaviour
         }
     }
 
-    // Función de ayuda opcional para limitar la rotación vertical de la cámara (mantenida)
+    // Funciï¿½n de ayuda opcional para limitar la rotaciï¿½n vertical de la cï¿½mara (mantenida)
     void ClampCameraRotation(Transform cameraTransform)
     {
         Vector3 currentRotation = cameraTransform.localEulerAngles;
