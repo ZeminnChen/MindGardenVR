@@ -2,32 +2,26 @@ using UnityEngine;
 
 public class InventoryZoneController : MonoBehaviour
 {
-    public GameObject inventoryCanvas;
-    private static int zonesEntered = 0; 
+    public GameObject inventoryPanel;
+
+    void Start()
+    {
+        inventoryPanel.SetActive(false);
+    }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("InventoryZone"))
         {
-            zonesEntered++;
-            UpdateCanvas();
+            inventoryPanel.SetActive(true);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("InventoryZone"))
         {
-            zonesEntered--;
-            UpdateCanvas();
-        }
-    }
-
-    private void UpdateCanvas()
-    {
-        if (inventoryCanvas != null)
-        {
-            inventoryCanvas.SetActive(zonesEntered > 0);
+            inventoryPanel.SetActive(false);
         }
     }
 }

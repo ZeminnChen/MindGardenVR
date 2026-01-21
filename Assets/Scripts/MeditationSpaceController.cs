@@ -2,15 +2,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
-
-// Stars space
 public class MeditationSpaceController : MonoBehaviour
 {
     public Camera mainCamera;
-    public GameObject starEffect;
+    public ParticleSystem starEffect; 
     public Image fadePanel;
     public float fadeDuration = 1.5f;
     public AudioSource audioSource; 
+    public GameObject inventoryPanel; 
 
     private int originalMask;
     private Color originalBackColor;
@@ -19,10 +18,16 @@ public class MeditationSpaceController : MonoBehaviour
     {
         if (mainCamera != null)
         {
-            originalMask = mainCamera.cullingMask;
+            originalMask = mainCamera.cullingMask & ~(1 << LayerMask.NameToLayer("Stars"));
+            mainCamera.cullingMask = originalMask;
             originalBackColor = mainCamera.backgroundColor;
         }
-        starEffect.SetActive(false);
+        
+        if (starEffect != null) 
+        {
+            starEffect.Stop();
+            starEffect.gameObject.SetActive(false);
+        }
         
         Color c = fadePanel.color;
         c.a = 0;
@@ -31,6 +36,7 @@ public class MeditationSpaceController : MonoBehaviour
 
     public void Activate()
     {
+        if (audioSource != null) audioSource.Stop(); // Seguridad: para el audio si estaba sonando
         StopAllCoroutines(); 
         StartCoroutine(MeditationRoutine());
     }
@@ -38,11 +44,17 @@ public class MeditationSpaceController : MonoBehaviour
     IEnumerator MeditationRoutine()
     {
         yield return StartCoroutine(Fade(1));
+        
+        if (inventoryPanel != null) inventoryPanel.SetActive(false);
+        
         ApplySpaceVisuals(true);
+
         yield return StartCoroutine(Fade(0));
 
-        if (audioSource != null)
+        if (audioSource != null && audioSource.clip != null) 
         {
+            audioSource.Play();
+
             while (audioSource.isPlaying)
             {
                 yield return null;
@@ -61,14 +73,24 @@ public class MeditationSpaceController : MonoBehaviour
             mainCamera.cullingMask = LayerMask.GetMask("Stars", "UI");
             mainCamera.clearFlags = CameraClearFlags.SolidColor;
             mainCamera.backgroundColor = Color.black;
-            starEffect.SetActive(true);
+            
+            if (starEffect != null) 
+            {
+                starEffect.gameObject.SetActive(true);
+                starEffect.Play();
+            }
         }
         else
         {
             mainCamera.cullingMask = originalMask;
             mainCamera.clearFlags = CameraClearFlags.Skybox;
             mainCamera.backgroundColor = originalBackColor;
-            starEffect.SetActive(false);
+            
+            if (starEffect != null) 
+            {
+                starEffect.Stop();
+                starEffect.gameObject.SetActive(false);
+            }
         }
     }
 

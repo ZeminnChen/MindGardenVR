@@ -2,8 +2,6 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 
-
-// Subtitles + Audio
 public class MeditationHandler : MonoBehaviour
 {
     [Header("Audio Tracks")]
@@ -17,7 +15,15 @@ public class MeditationHandler : MonoBehaviour
 
     private Coroutine sessionCoroutine;
 
-    // BE PRESENT
+    void Start()
+    {
+        // Esto permite que este audio específico suene aunque pausemos todos los demás
+        if (audioSource != null)
+        {
+            audioSource.ignoreListenerPause = true;
+        }
+    }
+
     public void PlayLotus() {
         string[] phrases = { 
             "I want you to let yourself be here, ",
@@ -42,7 +48,6 @@ public class MeditationHandler : MonoBehaviour
         StartMeditation(lotusClip, phrases, timestamps); 
     }
 
-    // BE YOU
     public void PlayZen() {
         string[] phrases = { 
             "I want you to start by placing both hands on your heart.", 
@@ -97,33 +102,51 @@ public class MeditationHandler : MonoBehaviour
     private void StartMeditation(AudioClip clip, string[] phrases, float[] times)
     {
         if (sessionCoroutine != null) StopCoroutine(sessionCoroutine);
+        
+        audioSource.clip = clip;
+        
+        MeditationSpaceController controller = FindObjectOfType<MeditationSpaceController>();
+        if (controller != null)
+        {
+            controller.Activate();
+        }
+
         sessionCoroutine = StartCoroutine(MeditationRoutine(clip, phrases, times));
     }
 
     IEnumerator MeditationRoutine(AudioClip clip, string[] phrases, float[] times)
     {
         subtitleText.text = ""; 
-        audioSource.clip = clip;
-        audioSource.Play();
 
-        float startTime = Time.time;
+        // Silenciamos todo el juego
+        AudioListener.pause = true;
+
+        while (!audioSource.isPlaying) yield return null;
+
         for (int i = 0; i < phrases.Length; i++)
         {
-            while (Time.time - startTime < times[i]) yield return null;
+            while (audioSource.time < times[i]) yield return null;
             
             subtitleText.text = phrases[i];
             subtitleText.canvasRenderer.SetAlpha(0f);
             subtitleText.CrossFadeAlpha(1f, 0.5f, false);
         }
 
-        yield return new WaitForSeconds(4f);
+        while (audioSource.isPlaying) yield return null;
+        
+        // Reactivamos todos los sonidos del juego al terminar
+        AudioListener.pause = false;
+
         subtitleText.CrossFadeAlpha(0f, 1f, false);
+        yield return new WaitForSeconds(1f);
+        subtitleText.text = "";
     }
 
     public void StopMeditation()
     {
         StopAllCoroutines();
         audioSource.Stop();
+        AudioListener.pause = false; // Aseguramos que el sonido vuelva si se cancela
         subtitleText.text = "";
     }
 }
