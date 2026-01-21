@@ -28,22 +28,29 @@ public class InventoryManager : MonoBehaviour
     // Añade esto dentro de tu clase InventoryManager
     public void ConsumeSeed(string seedName)
     {
+        // 1. Buscamos la semilla en la lista lógica
         var seed = seeds.Find(s => s.name == seedName);
+        
         if (seed != null && seed.quantity > 0)
         {
-            seed.quantity--;
+            seed.quantity--; // Restamos stock lógico
+            Debug.Log($"Stock lógico de {seedName} ahora es: {seed.quantity}");
 
-            // Buscamos el objeto visual en el inventario para que el texto disminuya allí también
+            // 2. Buscamos el elemento visual en la UI para actualizarlo
+            // Usamos FindObjectsByType para encontrar todos los botones del inventario
             InventoryItemUI[] uiItems = Object.FindObjectsByType<InventoryItemUI>(FindObjectsSortMode.None);
+            
             foreach (var uiItem in uiItems)
             {
+                // IMPORTANTE: Comparamos el nombre que viene del botón con el del item UI
                 if (uiItem.seedName == seedName)
                 {
-                    // Aquí necesitarás un método público en InventoryItemUI para restar
-                    uiItem.RemoveOne();
-                    break;
+                    uiItem.RemoveOne(); // Esto actualiza el texto o destruye el objeto
+                    return; // Salimos del bucle una vez encontrado
                 }
             }
+            
+            Debug.LogWarning($"No se encontró el objeto UI para: {seedName}. Revisa que el 'seedName' en el Inspector coincida.");
         }
     }
 }

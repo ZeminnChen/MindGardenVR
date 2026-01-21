@@ -28,7 +28,7 @@ public class PlantingSpot : MonoBehaviour
     public void SeleccionarYPlantar(string nombreSemilla)
     {
         if (isPlanted) return;
-
+    
         if (InventoryManager.Instance.HasSeed(nombreSemilla))
         {
             InventoryManager.Instance.ConsumeSeed(nombreSemilla);
