@@ -23,6 +23,19 @@ public class InventoryItemUI : MonoBehaviour
         UpdateText();
     }
 
+    public void RemoveOne()
+    {
+        quantity--;
+        if (quantity <= 0)
+        {
+            Destroy(gameObject); // Si no hay más, desaparece del inventario
+        }
+        else
+        {
+            UpdateText();
+        }
+    }
+
     public void SelectSeed()
     {
         PlayerInventory player = Object.FindFirstObjectByType<PlayerInventory>();

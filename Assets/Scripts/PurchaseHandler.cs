@@ -20,9 +20,11 @@ public class PurchaseHandler : MonoBehaviour
             }
         }
 
+
         GameObject newItem = Instantiate(flowerUIPrefab, inventoryParent);
         newItem.GetComponent<InventoryItemUI>().seedName = seedName;
         UpdateEmptyMessage();
+        InventoryManager.Instance.AddSeedData(seedName);
     }
 
     public void UpdateEmptyMessage()
