@@ -14,14 +14,11 @@ public class MeditationHandler : MonoBehaviour
     public TextMeshProUGUI subtitleText;
 
     private Coroutine sessionCoroutine;
-    [Header("Breathing Guide")]
-    public BreathingGuide breathingSphere; 
 
     IEnumerator MeditationRoutine(string[] phrases, float[] times)
     {
         subtitleText.text = ""; 
         AudioListener.pause = true; 
-        if(breathingSphere != null) breathingSphere.gameObject.SetActive(true);
 
         while (!audioSource.isPlaying) yield return null;
 
@@ -32,22 +29,12 @@ public class MeditationHandler : MonoBehaviour
             string currentPhrase = phrases[i].ToLower();
             subtitleText.text = phrases[i];
 
-            if (breathingSphere != null){
-                if (currentPhrase.Contains("breath in") || currentPhrase.Contains("inhale") || currentPhrase.Contains("fill up")){
-                    breathingSphere.Inhale(3.0f); 
-                }else if (currentPhrase.Contains("exhale") || currentPhrase.Contains("breath out") || currentPhrase.Contains("let it go")){
-                    breathingSphere.Exhale(4.0f); 
-                }
-            }
-
             subtitleText.canvasRenderer.SetAlpha(0f);
             subtitleText.CrossFadeAlpha(1f, 0.5f, false);
         }
 
         while (audioSource.isPlaying) yield return null;
-        
-        if(breathingSphere != null) breathingSphere.ResetGuide();
-        AudioListener.pause = false; 
+
     }
 
     void Start()
