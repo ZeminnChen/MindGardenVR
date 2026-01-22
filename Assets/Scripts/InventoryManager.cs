@@ -25,10 +25,9 @@ public class InventoryManager : MonoBehaviour
 
     public bool HasSeed(string seedName) => seeds.Find(s => s.name == seedName).quantity > 0;
 
-    // Añade esto dentro de tu clase InventoryManager
+    /*
     public void ConsumeSeed(string seedName)
     {
-        // 1. Buscamos la semilla en la lista lógica
         var seed = seeds.Find(s => s.name == seedName);
         
         if (seed != null && seed.quantity > 0)
@@ -51,6 +50,33 @@ public class InventoryManager : MonoBehaviour
             }
             
             Debug.LogWarning($"No se encontró el objeto UI para: {seedName}. Revisa que el 'seedName' en el Inspector coincida.");
+        }
+    }
+    */
+    public void ConsumeSeed(string seedName)
+    {
+        var seed = seeds.Find(s => s.name == seedName);
+        if (seed != null && seed.quantity > 0)
+        {
+            seed.quantity--;
+
+            InventoryItemUI[] uiItems = Object.FindObjectsByType<InventoryItemUI>(FindObjectsSortMode.None);
+            bool foundUI = false;
+
+            foreach (var uiItem in uiItems)
+            {
+                if (uiItem.seedName == seedName)
+                {
+                    uiItem.RemoveOne(); // Esto destruirá el objeto si llega a 0
+                    foundUI = true;
+                    break;
+                }
+            }
+
+            if (!foundUI) 
+            {
+                Debug.LogError($"[Inventario] Se restó stock de '{seedName}', pero no se encontró un objeto UI con ese nombre exacto.");
+            }
         }
     }
 }

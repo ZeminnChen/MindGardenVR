@@ -7,13 +7,26 @@ public class InventoryItemUI : MonoBehaviour
     public string seedName;
     public TextMeshProUGUI quantityText;
     public GameObject flower3DPrefab; // Drag the 3D FLOWER MODEL here
-    private int quantity = 1;
+    private int quantity = 0;
 
     void Start()
     {
-        // Automatically link the UI button to the SelectSeed function
         Button btn = GetComponent<Button>();
         if (btn != null) btn.onClick.AddListener(SelectSeed);
+        //UpdateText();
+        SyncQuantityWithManager();
+    }
+
+    private void SyncQuantityWithManager()
+    {
+        if (InventoryManager.Instance != null)
+        {
+            var seedData = InventoryManager.Instance.seeds.Find(s => s.name == seedName);
+            if (seedData != null)
+            {
+                quantity = seedData.quantity;
+            }
+        }
         UpdateText();
     }
 
@@ -23,12 +36,39 @@ public class InventoryItemUI : MonoBehaviour
         UpdateText();
     }
 
+    /*
     public void RemoveOne()
     {
         quantity--;
         if (quantity <= 0)
         {
-            Destroy(gameObject); // Si no hay más, desaparece del inventario
+            Destroy(gameObject); 
+        }
+        else
+        {
+            UpdateText();
+        }
+    }
+    */
+        public void RemoveOne()
+    {
+        // Obtenemos la cantidad actualizada del Manager directamente
+        if (InventoryManager.Instance != null)
+        {
+            var seedData = InventoryManager.Instance.seeds.Find(s => s.name == seedName);
+            if (seedData != null)
+            {
+                quantity = seedData.quantity; // Ahora quantity es la del Manager
+            }
+            else
+            {
+                quantity = 0;
+            }
+        }
+
+        if (quantity <= 0)
+        {
+            Destroy(gameObject); // Se elimina el botón si no hay stock real
         }
         else
         {
@@ -42,7 +82,7 @@ public class InventoryItemUI : MonoBehaviour
         if (player != null)
         {
             player.selectedSeedName = this.seedName;
-            player.prefabToPlant = this.flower3DPrefab; // Passes the 3D model to the player
+            player.prefabToPlant = this.flower3DPrefab; 
         }
     }
 
