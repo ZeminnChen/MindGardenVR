@@ -9,22 +9,38 @@ public class PurchaseHandler : MonoBehaviour
 
     public void ExecutePurchase() 
     {
-        InventoryItemUI[] items = inventoryParent.GetComponentsInChildren<InventoryItemUI>();
+        // 1. Añadimos la semilla a la base de datos
+        InventoryManager.Instance.AddSeedData(seedName);
 
-        foreach (InventoryItemUI item in items)
+        // 2. VERIFICACIÓN DE SEGURIDAD PARA LA TIENDA VISUAL
+        // Buscamos si ya existe el icono visual en el panel de inventario PRINCIPAL (la mochila)
+        bool visualItemExists = false;
+        
+        // Buscamos solo en los hijos del panel de inventario (no en las macetas)
+        InventoryItemUI[] itemsEnMochila = inventoryParent.GetComponentsInChildren<InventoryItemUI>(true); // true = busca ocultos
+
+        foreach (InventoryItemUI item in itemsEnMochila)
         {
             if (item.seedName == seedName)
             {
-                item.AddOne(); 
-                return;
+                visualItemExists = true;
+                break;
             }
         }
 
+        // Si es la primera vez que compramos esta flor y no tiene dibujo, lo creamos
+        if (!visualItemExists)
+        {
+            GameObject newItem = Instantiate(flowerUIPrefab, inventoryParent);
+            InventoryItemUI uiScript = newItem.GetComponent<InventoryItemUI>();
+            uiScript.seedName = seedName;
+        }
 
-        GameObject newItem = Instantiate(flowerUIPrefab, inventoryParent);
-        newItem.GetComponent<InventoryItemUI>().seedName = seedName;
+        // 3. ACTUALIZAMOS TODO
+        // Esto hará que las cartas en las macetas aparezcan mágicamente si estaban ocultas
+        InventoryManager.Instance.NotificarCambiosUI();
+        
         UpdateEmptyMessage();
-        InventoryManager.Instance.AddSeedData(seedName);
     }
 
     public void UpdateEmptyMessage()

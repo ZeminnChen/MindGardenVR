@@ -6,75 +6,52 @@ public class InventoryItemUI : MonoBehaviour
 {
     public string seedName;
     public TextMeshProUGUI quantityText;
-    public GameObject flower3DPrefab; // Drag the 3D FLOWER MODEL here
-    private int quantity = 0;
+    public GameObject flower3DPrefab; 
 
     void Start()
     {
         Button btn = GetComponent<Button>();
         if (btn != null) btn.onClick.AddListener(SelectSeed);
-        //UpdateText();
-        SyncQuantityWithManager();
+        
+        // Al nacer, nos actualizamos
+        RefreshVisuals();
     }
 
-    private void SyncQuantityWithManager()
+    public void RefreshVisuals()
     {
         if (InventoryManager.Instance != null)
         {
             var seedData = InventoryManager.Instance.seeds.Find(s => s.name == seedName);
+            
             if (seedData != null)
             {
-                quantity = seedData.quantity;
+                int currentQty = seedData.quantity;
+
+                // CAMBIO IMPORTANTE:
+                // Si hay 0, NO destruimos el objeto. Solo lo desactivamos (ocultamos).
+                // Si hay > 0, lo activamos (mostramos).
+                if (currentQty > 0)
+                {
+                    gameObject.SetActive(true);
+                    
+                    if (quantityText != null)
+                    {
+                        quantityText.gameObject.SetActive(true);
+                        quantityText.text = "x" + currentQty;
+                    }
+                }
+                else
+                {
+                    // Lo ocultamos para que no moleste, pero sigue existiendo en memoria
+                    gameObject.SetActive(false);
+                }
             }
         }
-        UpdateText();
     }
 
-    public void AddOne()
-    {
-        quantity++;
-        UpdateText();
-    }
-
-    /*
-    public void RemoveOne()
-    {
-        quantity--;
-        if (quantity <= 0)
-        {
-            Destroy(gameObject); 
-        }
-        else
-        {
-            UpdateText();
-        }
-    }
-    */
-        public void RemoveOne()
-    {
-        // Obtenemos la cantidad actualizada del Manager directamente
-        if (InventoryManager.Instance != null)
-        {
-            var seedData = InventoryManager.Instance.seeds.Find(s => s.name == seedName);
-            if (seedData != null)
-            {
-                quantity = seedData.quantity; // Ahora quantity es la del Manager
-            }
-            else
-            {
-                quantity = 0;
-            }
-        }
-
-        if (quantity <= 0)
-        {
-            Destroy(gameObject); // Se elimina el botón si no hay stock real
-        }
-        else
-        {
-            UpdateText();
-        }
-    }
+    // Estas funciones solo llaman a refrescar visualmente
+    public void AddOne() => RefreshVisuals();
+    public void RemoveOne() => RefreshVisuals();
 
     public void SelectSeed()
     {
@@ -83,15 +60,7 @@ public class InventoryItemUI : MonoBehaviour
         {
             player.selectedSeedName = this.seedName;
             player.prefabToPlant = this.flower3DPrefab; 
-        }
-    }
-
-    private void UpdateText()
-    {
-        if (quantityText != null)
-        {
-            quantityText.gameObject.SetActive(quantity > 1);
-            quantityText.text = "x" + quantity;
+            Debug.Log("Seleccionada semilla: " + seedName);
         }
     }
 }

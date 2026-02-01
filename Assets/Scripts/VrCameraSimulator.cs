@@ -1,26 +1,27 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// Aseg�rate de que este script requiere el CharacterController para evitar errores.
+// Asegura que el Player tenga el cuerpo físico necesario
 [RequireComponent(typeof(CharacterController))]
 public class VrCommands : MonoBehaviour
 {
-    // Variables de control de rotaci�n (mantenidas)
+    [Header("Configuración de Movimiento")]
     public float rotationSpeed = 30.0f;
 
-    // --- Variables de Teletransporte ---
+    [Header("Configuración de Teletransporte")]
     public float maxTeleportDistance = 20.0f;
-    [Tooltip("La capa que representa el suelo o superficies a las que se puede teletransportar.")]
-    public LayerMask teleportLayerMask;
+    
+    // IMPORTANTE: En el Inspector, pon esto en "Everything" para que el rayo no atraviese paredes
+    public LayerMask teleportLayerMask; 
 
-    // Referencias
+    // Referencias internas
     private CharacterController characterController;
     private Transform mainCameraTransform;
 
     // Variables de Input
     public MyPlayerControlls controls;
     private Vector2 lookInput;
-    private bool teleportTriggered; // Usamos esto para detectar la pulsaci�n/soltura
+    private bool teleportTriggered; 
 
     private void Awake()
     {
@@ -28,11 +29,12 @@ public class VrCommands : MonoBehaviour
         mainCameraTransform = Camera.main.transform;
 
         controls = new MyPlayerControlls();
+        
+        // Configurar los controles de mirada
         controls.MyPlayer.Look.performed += OnLookPerformed;
         controls.MyPlayer.Look.canceled += OnLookCanceled;
 
-        // CAMBIO CLAVE: El teletransporte se inicia al presionar (started)
-        // y se ejecuta al soltar (canceled) la tecla 'MoveForward'.
+        // Configurar el teletransporte (presionar para preparar, soltar para ejecutar)
         controls.MyPlayer.MoveForward.started += ctx => teleportTriggered = true;
         controls.MyPlayer.MoveForward.canceled += ctx => TeleportPlayer();
     }
@@ -48,75 +50,77 @@ public class VrCommands : MonoBehaviour
     }
 
     private void OnEnable() => controls.Enable();
-
     private void OnDisable() => controls.Disable();
 
     void Start()
     {
+        // Ocultar el ratón para que no moleste
         Cursor.lockState = CursorLockMode.Locked;
+        
         if (mainCameraTransform.parent != transform)
         {
-            Debug.LogWarning("La c�mara principal no es hija del Player. La rotaci�n de mirada vertical no funcionar� correctamente.");
+            Debug.LogWarning("AVISO: La cámara principal no es hija del Player.");
         }
     }
 
     void Update()
     {
-        // 1. Rotaci�n de la Mirada (Ejes X y Y)
         HandleRotation();
     }
 
     private void HandleRotation()
     {
-        // Rotaci�n Horizontal (Y) en el Player
+        // Rotar el cuerpo del personaje (Izquierda/Derecha)
         transform.Rotate(0, lookInput.x * rotationSpeed * Time.deltaTime, 0);
 
-        // Rotaci�n Vertical (X) en la C�mara
+        // Rotar la cámara (Arriba/Abajo)
         if (mainCameraTransform != null && mainCameraTransform.parent == transform)
         {
-            mainCameraTransform.localRotation *= Quaternion.Euler(-lookInput.y * rotationSpeed * Time.deltaTime, 0, 0);
-            ClampCameraRotation(mainCameraTransform);
+            Vector3 currentRotation = mainCameraTransform.localEulerAngles;
+            
+            // Calculamos la nueva rotación
+            float newRotationX = currentRotation.x - (lookInput.y * rotationSpeed * Time.deltaTime);
+            
+            // Ajustes matemáticos para evitar que el cuello gire 360 grados
+            if (newRotationX > 180) newRotationX -= 360;
+            newRotationX = Mathf.Clamp(newRotationX, -80f, 80f);
+            
+            mainCameraTransform.localEulerAngles = new Vector3(newRotationX, 0, 0);
         }
     }
 
     private void TeleportPlayer()
     {
-        // Se ejecuta solo una vez al soltar la tecla
-        Debug.Log("Intentando Teletransportar...");
+        // Solo ejecutamos si se había presionado el botón antes
         if (!teleportTriggered) return;
         teleportTriggered = false;
 
         RaycastHit hit;
 
-        // El Raycast se dispara desde la posici�n y direcci�n de la c�mara (la mirada).
+        // Lanzamos el rayo láser invisible
         if (Physics.Raycast(mainCameraTransform.position, mainCameraTransform.forward, out hit, maxTeleportDistance, teleportLayerMask))
         {
-            // La altura a mantener: la mitad de la altura del CharacterController m�s el skin.
-            float playerHeightOffset = characterController.height / 2f + characterController.skinWidth;
+            // --- NUEVA PROTECCIÓN ANTI-PAREDES ---
+            // Verificamos si lo que hemos tocado NO es el suelo.
+            // Esto asume que tu suelo tiene la Layer llamada "Ground".
+            if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Ground"))
+            {
+                Debug.Log("¡No puedo teletransportarme ahí! Es una pared u obstáculo.");
+                return; // Cancelamos el teletransporte
+            }
+            // -------------------------------------
 
+            Debug.Log($"Teletransportando a: {hit.point}");
+
+            // Calcular altura para no quedar enterrado en el suelo
+            float playerHeightOffset = characterController.height / 2f + characterController.skinWidth;
             Vector3 newPosition = hit.point;
             newPosition.y += playerHeightOffset;
 
-            // Movimiento instant�neo con CharacterController:
-            // 1. Deshabilitar para evitar problemas de colisi�n al teletransportar.
-            characterController.enabled = false;
-            // 2. Teletransportar.
-            transform.position = newPosition;
-            // 3. Habilitar de nuevo.
-            characterController.enabled = true;
-
-            Debug.Log($"Teletransportado a {newPosition}");
+            // Truco para mover el CharacterController sin conflictos
+            characterController.enabled = false; // Apagamos el cuerpo un milisegundo
+            transform.position = newPosition;    // Nos movemos
+            characterController.enabled = true;  // Lo encendemos de nuevo
         }
-    }
-
-    // Funci�n de ayuda opcional para limitar la rotaci�n vertical de la c�mara (mantenida)
-    void ClampCameraRotation(Transform cameraTransform)
-    {
-        Vector3 currentRotation = cameraTransform.localEulerAngles;
-        if (currentRotation.x > 180) currentRotation.x -= 360;
-        currentRotation.x = Mathf.Clamp(currentRotation.x, -80f, 80f);
-        currentRotation.y = 0;
-        currentRotation.z = 0;
-        cameraTransform.localEulerAngles = currentRotation;
     }
 }

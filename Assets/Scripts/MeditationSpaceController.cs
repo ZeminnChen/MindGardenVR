@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.InputSystem; // Asegúrate de tener esto para el New Input System
 
 public class MeditationSpaceController : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class MeditationSpaceController : MonoBehaviour
     public float fadeDuration = 1.5f;
     public AudioSource audioSource; 
     public GameObject inventoryPanel; 
+    public GameObject subtitleText; 
 
     private int originalMask;
     private Color originalBackColor;
@@ -18,6 +20,7 @@ public class MeditationSpaceController : MonoBehaviour
     {
         if (mainCamera != null)
         {
+            // Guardamos la configuración inicial pero ocultamos las estrellas
             originalMask = mainCamera.cullingMask & ~(1 << LayerMask.NameToLayer("Stars"));
             mainCamera.cullingMask = originalMask;
             originalBackColor = mainCamera.backgroundColor;
@@ -29,6 +32,9 @@ public class MeditationSpaceController : MonoBehaviour
             starEffect.gameObject.SetActive(false);
         }
         
+        if (subtitleText != null) subtitleText.SetActive(false);
+
+        // Inicializar el panel de fade invisible
         Color c = fadePanel.color;
         c.a = 0;
         fadePanel.color = c;
@@ -36,7 +42,7 @@ public class MeditationSpaceController : MonoBehaviour
 
     public void Activate()
     {
-        if (audioSource != null) audioSource.Stop(); // Seguridad: para el audio si estaba sonando
+        if (audioSource != null) audioSource.Stop(); 
         StopAllCoroutines(); 
         StartCoroutine(MeditationRoutine());
     }
@@ -48,6 +54,7 @@ public class MeditationSpaceController : MonoBehaviour
         if (inventoryPanel != null) inventoryPanel.SetActive(false);
         
         ApplySpaceVisuals(true);
+        if (subtitleText != null) subtitleText.SetActive(true);
 
         yield return StartCoroutine(Fade(0));
 
@@ -57,9 +64,16 @@ public class MeditationSpaceController : MonoBehaviour
 
             while (audioSource.isPlaying)
             {
+                if (Keyboard.current != null && Keyboard.current.wKey.wasPressedThisFrame) 
+                {
+                    audioSource.Stop();
+                    break; 
+                }
                 yield return null;
             }
         }
+
+        if (subtitleText != null) subtitleText.SetActive(false);
 
         yield return StartCoroutine(Fade(1));
         ApplySpaceVisuals(false);
@@ -70,7 +84,8 @@ public class MeditationSpaceController : MonoBehaviour
     {
         if (isSpace)
         {
-            mainCamera.cullingMask = LayerMask.GetMask("Stars", "UI");
+            // Solo vemos Estrellas y la capa UI_Visible (donde está el Fade y Subtítulos)
+            mainCamera.cullingMask = LayerMask.GetMask("Stars", "UI_Visible");
             mainCamera.clearFlags = CameraClearFlags.SolidColor;
             mainCamera.backgroundColor = Color.black;
             
