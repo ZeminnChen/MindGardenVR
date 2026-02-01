@@ -3,47 +3,52 @@ using System.Collections;
 
 public class PlantingSpot : MonoBehaviour
 {
-    [Header("Referencias UI")]
-    public GameObject menuPopup; // ¡Arrastra el Canvas aquí!
+    [Header("UI References")]
+    public GameObject menuPopup;
+    private Transform cameraTransform;
 
-    [Header("Configuración de Tiempo")]
-    public float duracionPlanta = 8.0f; // La flor vive 8 segundos
-    public float duracionMenu = 10.0f;  // El menú se cierra solo a los 10s
+    [Header("Time Configuration")]
+    public float plantDuration = 60.0f;
+    public float menuMaxDuration = 1.5f;
+    public float shrinkDuration = 1.5f;
 
-    [Header("Estado (Solo lectura)")]
+    [Header("Status (Read Only)")]
     public bool isPlanted = false;
-    
+
     private float menuTimer = 0f;
 
-    // --- 1. CONTROL DEL MENÚ (GAZE) ---
+    void Start()
+    {
+        if (Camera.main != null)
+            cameraTransform = Camera.main.transform;
+    }
+
     public void OnGazeEnter()
     {
-        // Solo abrimos si está vacía
         if (!isPlanted && menuPopup != null)
         {
             menuPopup.SetActive(true);
-            menuTimer = duracionMenu; // Reiniciamos la cuenta atrás del menú
+            menuTimer = menuMaxDuration;
         }
     }
 
     public void OnGazeExit()
     {
-        // OPCIONAL: Si quieres que se cierre AL INSTANTE cuando miras a otro lado,
-        // descomenta la línea de abajo.
-        // Si prefieres que se quede flotando unos segundos, déjalo así.
-        
-        if (menuPopup != null) menuPopup.SetActive(false); 
+        if (menuPopup != null)
+        {
+            menuPopup.SetActive(false);
+        }
     }
 
-    // --- 2. BUCLE DEL MENÚ ---
     private void Update()
     {
-        // Si el menú está abierto, contamos hacia atrás
         if (menuPopup != null && menuPopup.activeSelf)
         {
-            menuTimer -= Time.deltaTime;
+            // BILLBOARDING: Menu always faces the player
+            menuPopup.transform.LookAt(cameraTransform);
+            menuPopup.transform.Rotate(0, 180, 0);
 
-            // ¡Se acabó el tiempo! Cerramos el menú.
+            menuTimer -= Time.deltaTime;
             if (menuTimer <= 0)
             {
                 menuPopup.SetActive(false);
@@ -51,68 +56,55 @@ public class PlantingSpot : MonoBehaviour
         }
     }
 
-    // --- 3. LÓGICA DE PLANTAR ---
-    public void SeleccionarYPlantar(string nombreSemilla)
+    public void SelectAndPlant(string seedName)
     {
         if (isPlanted) return;
 
-        if (InventoryManager.Instance.HasSeed(nombreSemilla))
+        if (InventoryManager.Instance.HasSeed(seedName))
         {
-            InventoryManager.Instance.ConsumeSeed(nombreSemilla);
-            var seedData = InventoryManager.Instance.seeds.Find(s => s.name == nombreSemilla);
+            InventoryManager.Instance.ConsumeSeed(seedName);
+            var seedData = InventoryManager.Instance.seeds.Find(s => s.name == seedName);
 
             if (seedData != null && seedData.flowerPrefab != null)
             {
-                // 1. Crear Planta
-                GameObject nuevaPlanta = Instantiate(seedData.flowerPrefab, transform.position, Quaternion.identity, transform);
+                GameObject newPlant = Instantiate(seedData.flowerPrefab, transform.position, Quaternion.identity, transform);
 
                 InventoryManager.Instance.plantasTotales++;
                 InventoryManager.Instance.NotificarCambiosUI();
                 
-                // 2. Hacerla crecer
-                StartCoroutine(GrowRoutine(nuevaPlanta));
+                StartCoroutine(GrowRoutine(newPlant));
+                StartCoroutine(PlantLifeCycle(newPlant));
 
-                // 3. Programar su muerte (La nueva lógica de 8 segundos)
-                StartCoroutine(CicloDeVidaPlanta(nuevaPlanta));
-
-                // 4. Actualizar Estado
                 isPlanted = true;
-                
-                // 5. Cerrar menú inmediatamente
                 if (menuPopup != null) menuPopup.SetActive(false);
             }
         }
     }
 
-    // --- 4. RUTINAS DE TIEMPO ---
-    
-    // Esta rutina espera X segundos y luego mata la planta
-    IEnumerator CicloDeVidaPlanta(GameObject planta)
+    private IEnumerator PlantLifeCycle(GameObject plant)
     {
-        // Esperamos los 8 segundos de vida
-        yield return new WaitForSeconds(duracionPlanta);
+        yield return new WaitForSeconds(plantDuration);
 
-        // Efecto opcional: encoger antes de desaparecer
         float timer = 0f;
-        Vector3 escalaFinal = planta.transform.localScale;
-        while (timer < 1.0f)
+        if (plant != null)
         {
-            timer += Time.deltaTime;
-            // Lerp hacia 0 (encoger)
-            planta.transform.localScale = Vector3.Lerp(escalaFinal, Vector3.zero, timer); 
-            yield return null;
+            Vector3 initialScale = plant.transform.localScale;
+            while (timer < shrinkDuration)
+            {
+                if (plant == null) break;
+                timer += Time.deltaTime;
+                plant.transform.localScale = Vector3.Lerp(initialScale, Vector3.zero, timer / shrinkDuration); 
+                yield return null;
+            }
         }
 
-        // Adiós planta
-        if (planta != null) Destroy(planta);
-        
-        // ¡La maceta está libre de nuevo!
+        if (plant != null) Destroy(plant);
         isPlanted = false;
-        Debug.Log("La planta ha muerto de vieja. Maceta libre.");
     }
 
-    IEnumerator GrowRoutine(GameObject flower)
+    private IEnumerator GrowRoutine(GameObject flower)
     {
+        if (flower == null) yield break;
         flower.transform.localScale = Vector3.zero;
         while (flower != null && flower.transform.localScale.x < 1f)
         {

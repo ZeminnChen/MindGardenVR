@@ -84,7 +84,7 @@ public class LanternAction : MonoBehaviour
 
         if (btnZen != null)
         {
-            bool debeVerse = (plantas >= 3);
+            bool debeVerse = (plantas >= 2);
             btnZen.gameObject.SetActive(debeVerse);
             Debug.Log("🔍 DIAGNÓSTICO: Botón Zen debe verse: " + debeVerse);
         }
@@ -92,7 +92,7 @@ public class LanternAction : MonoBehaviour
 
         if (btnBamboo != null)
         {
-            bool debeVerse = (plantas >= 5);
+            bool debeVerse = (plantas >= 4);
             btnBamboo.gameObject.SetActive(debeVerse);
             Debug.Log("🔍 DIAGNÓSTICO: Botón Bamboo debe verse: " + debeVerse);
         }

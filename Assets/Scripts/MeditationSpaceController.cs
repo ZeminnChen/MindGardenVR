@@ -84,8 +84,7 @@ public class MeditationSpaceController : MonoBehaviour
     {
         if (isSpace)
         {
-            // Solo vemos Estrellas y la capa UI_Visible (donde está el Fade y Subtítulos)
-            mainCamera.cullingMask = LayerMask.GetMask("Stars", "UI_Visible");
+            mainCamera.cullingMask = LayerMask.GetMask("Stars", "UI");
             mainCamera.clearFlags = CameraClearFlags.SolidColor;
             mainCamera.backgroundColor = Color.black;
             
